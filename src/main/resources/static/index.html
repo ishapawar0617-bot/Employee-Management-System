@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management System</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            background:#f4f4f4;
+            padding:30px;
+        }
+
+        .container{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            width:80%;
+            margin:auto;
+        }
+
+        h1{
+            text-align:center;
+        }
+
+        input{
+            padding:10px;
+            margin:10px;
+            width:25%;
+        }
+
+        button{
+            padding:10px 15px;
+            background:blue;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            margin-top:20px;
+            border-collapse:collapse;
+        }
+
+        table,th,td{
+            border:1px solid gray;
+        }
+
+        th,td{
+            padding:10px;
+            text-align:center;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Employee Management System</h1>
+
+    <input type="hidden" id="id">
+
+    <input type="text" id="firstName" placeholder="First Name">
+
+    <input type="text" id="lastName" placeholder="Last Name">
+
+    <input type="email" id="email" placeholder="Email">
+
+    <button onclick="saveEmployee()">Save Employee</button>
+
+    <table>
+
+        <thead>
+
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+
+        </thead>
+
+        <tbody id="tableBody">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+const API="http://localhost:9090/api/employees";
+
+window.onload=function(){
+    loadEmployees();
+}
+
+function loadEmployees(){
+
+    fetch(API)
+
+    .then(res=>res.json())
+
+    .then(data=>{
+
+        let body=document.getElementById("tableBody");
+
+        body.innerHTML="";
+
+        data.forEach(emp=>{
+
+            body.innerHTML+=`
+
+            <tr>
+
+            <td>${emp.id}</td>
+            <td>${emp.firstName}</td>
+            <td>${emp.lastName}</td>
+            <td>${emp.email}</td>
+
+            <td>
+
+            <button onclick="editEmployee(${emp.id},'${emp.firstName}','${emp.lastName}','${emp.email}')">Edit</button>
+
+            <button onclick="deleteEmployee(${emp.id})">Delete</button>
+
+            </td>
+
+            </tr>
+
+            `;
+
+        });
+
+    });
+
+}
+
+function saveEmployee(){
+
+    let id=document.getElementById("id").value;
+
+    let firstName=document.getElementById("firstName").value;
+
+    let lastName=document.getElementById("lastName").value;
+
+    let email=document.getElementById("email").value;
+
+    let employee={
+
+        id:id,
+        firstName:firstName,
+        lastName:lastName,
+        email:email
+    };
+
+    let method=id ? "PUT":"POST";
+
+    fetch(API,{
+
+        method:method,
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify(employee)
+
+    })
+
+    .then(res=>res.json())
+
+    .then(data=>{
+
+        clearForm();
+
+        loadEmployees();
+
+    });
+
+}
+
+function editEmployee(id,firstName,lastName,email){
+
+    document.getElementById("id").value=id;
+
+    document.getElementById("firstName").value=firstName;
+
+    document.getElementById("lastName").value=lastName;
+
+    document.getElementById("email").value=email;
+
+}
+
+function deleteEmployee(id){
+
+    fetch(API+"/"+id,{
+
+        method:"DELETE"
+
+    })
+
+    .then(()=>{
+
+        loadEmployees();
+
+    });
+
+}
+
+function clearForm(){
+
+    document.getElementById("id").value="";
+
+    document.getElementById("firstName").value="";
+
+    document.getElementById("lastName").value="";
+
+    document.getElementById("email").value="";
+
+}
+
+</script>
+
+</body>
+</html>
